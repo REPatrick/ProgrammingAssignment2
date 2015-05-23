@@ -1,15 +1,44 @@
-## Put comments here that give an overall description of what your
-## functions do
+## Matrix Inverse caching object
 
-## Write a short comment describing this function
-
+## create a matrix "wrapper" that adds support for a cached inverse matrix
 makeCacheMatrix <- function(x = matrix()) {
-
+  i <- NULL
+  set <- function(y) {
+    x <<- y
+    i <<- NULL
+  }
+  get <- function() x
+  setinverse <- function(inv) i <<- inv
+  getinverse <- function() i;
+  return(list(set = set, get = get,
+              setinverse = setinverse,
+              getinverse = getinverse))
 }
 
-
-## Write a short comment describing this function
-
+## Returns a matrix that is the inverse of 'x', caches the result
+## so the calculation is done only once, even if called multiple times
 cacheSolve <- function(x, ...) {
-        ## Return a matrix that is the inverse of 'x'
+  inv <- x$getinverse()
+  if(!is.null(inv)) {
+    message("getting cached data")
+    return(inv)
+  }
+  data <- x$get()
+  message("calculating inverse")
+  inv <- solve(data, ...)
+  x$setinverse(inv)
+  return(inv)
 }
+
+
+## my testing code
+testMatrix <- matrix(trunc(rnorm(4*4)*100),4,4) 
+
+wrappedTestMatrix <- makeCacheMatrix(testMatrix)
+print(wrappedTestMatrix)
+
+invertedTextMatrix1 <- cacheSolve(wrappedTestMatrix);
+print(invertedTextMatrix1)
+
+invertedTextMatrix2 <- cacheSolve(wrappedTestMatrix);
+print(invertedTextMatrix1)
